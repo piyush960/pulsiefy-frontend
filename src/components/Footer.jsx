@@ -6,7 +6,7 @@ import { footer_aboutus, footer_icons } from '../constants'
 const Footer = () => {
   return (
     <div className='flex flex-1 justify-center items-center my-5 p-5 bg-white shadow-sm'>
-      <div className='w-[1270px] flex justify-between max-lg:px-10 py-7 gap-8'>
+      <div className='mycontainer flex justify-between py-7 gap-8'>
         <div className='flex flex-col flex-1 gap-4 items-start justify-center'>
           <Logo />
           <img src="assets/images/footer_heart.svg" alt="heart" className='w-[150px] h-[200px]'/>
