@@ -10,10 +10,21 @@
     .card{
         @apply bg-white rounded-md shadow-md;
     }
+
+    .text-label{
+        @apply text-lg text-slate-400 font-medium tracking-normal;
+    }
+
+    .form-input{
+        @apply outline-none border-none p-2 mb-1 bg-slate-100 rounded-md text-slate-600 font-medium text-sm;
+    }
+
 }
+
 
 @layer components{
     .btn-primary{
         @apply bg-blue-500 py-2 px-4 rounded-full font-bold text-white hover:bg-blue-600;
     }
+
 }

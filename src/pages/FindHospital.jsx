@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import MapWrapper from '../components/MapWrapper'
+import { MapWrapper } from '../components'
 
 
 const FindHospital = () => {

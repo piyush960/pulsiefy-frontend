@@ -23,16 +23,15 @@ const Footer = () => {
         </div>
         <div className='flex-1 '>
         <h2 className='text-xl font-bold border-b-2 pb-2'>Follow Us On</h2>
-        <div className='flex gap-10 justify-center py-5'>
+        <div className='flex gap-10 justify-center py-5 flex-wrap'>
           {
             footer_icons.map((icon) => (
               <div key={icon.name} className='py-1 text-slate-600 hover:text-blue-500'>
-                <Link ><img src={icon.icon} alt="icon" className='w-[30px] h-[30px] opacity-80 hover:bg-blue-300 rounded-md'/></Link>
+                <Link ><img src={icon.icon} alt="icon" className='w-[30px] h-[30px] opacity-80 hover:bg-blue-100 rounded-md'/></Link>
               </div>
             ))
           }
         </div>
-          
         </div>
       </div>
     </div>

@@ -1,16 +1,19 @@
 import React from 'react'
-import Homepage from './pages/Homepage'
 import { Routes, Route } from 'react-router-dom'
-import HospitalDetails from './pages/HospitalDetails'
+import { Homepage, HospitalDetails, BookAppointment, RegisterForDonation } from './pages'
+import { Navbar } from './components'
 
 const App = () => {
   return (
-
-    <Routes>
-      <Route path='/' element={<Homepage />} />
-      <Route path='/details' element={<HospitalDetails />} />
-
-    </Routes>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path='/' element={<Homepage />} />
+        <Route path='/details' element={<HospitalDetails />} />
+        <Route path='/book-appointment' element={<BookAppointment />} />
+        <Route path='/donate' element={<RegisterForDonation />}/>
+      </Routes>
+    </>
   )
 }
 
