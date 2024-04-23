@@ -1,8 +1,10 @@
 import React from 'react'
-import { Card, Footer, Hero, Navbar, Recents } from '../components'
-import { facilities } from '../constants';
+import { Card, Footer, Hero, Navbar, Recents } from '../../components'
+import { facilities } from '../../constants';
+import { useSelector } from 'react-redux';
 
 const Homepage = () => {
+  
   return (
     <div className='bg-slate-100 h-auto'>
         <Hero />

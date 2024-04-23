@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import MapWrapper from '../components/MapWrapper'
-import { Link } from 'react-router-dom';
+import MapWrapper from '../../components/MapWrapper'
+import { Link, useLocation } from 'react-router-dom';
 
 const HospitalDetails = () => {
 
   const [userCoords, setUserCoords] = useState(null);
   const [hospitalCoords, setHospitalCoords] = useState([73.8572, 18.4593]);
+  const { state } = useLocation();
 
   const success = (pos) => {
     const latitude = pos.coords.latitude;
@@ -24,9 +25,17 @@ const HospitalDetails = () => {
     else{
       console.log("GPS not found");
     }
+    setHospitalCoords([state?.longitude, state?.latitude])
   }, [])
 
-  const hosTypes = ['General Hospital', 'Accident', 'Psycotherapy']
+  const hosTypes = state?.types
+  let color = 'text-slate-400';
+  if(state?.state?.toLowerCase().includes('close')){
+    color = 'text-red-400'
+  }
+  else if(state?.state?.toLowerCase().includes('open')){
+    color = 'text-green-400'
+  }
 
 
   return (
@@ -34,14 +43,14 @@ const HospitalDetails = () => {
           <div className='mycontainer'>
             <div className='card flex justify-between my-10 max-lg:flex-col'>
                 <div className='flex flex-col max-lg:flex-row gap-2 justify-center items-center m-5 pr-4 border-r-gray-100 lg:border-r-2 max-lg:justify-around max-sm:flex-col'>
-                    <img src="https://lh5.googleusercontent.com/p/AF1QipPJ9L0CU7K7l4Mcu6mdTgeXbL-dUD1KLo8C-Fnd=w5152-h3864-k-no" alt="hospital image" className='h-[200px] w-[250px] rounded-md shadow-md'/>
+                    <img src={state?.photos[0].src} alt="hospital image" className='h-[200px] w-[250px] rounded-md shadow-md'/>
                     <div className='flex flex-col gap-2 items-center'>
-                      <h3 className='font-bold text-xl tracking-tight text-blue-400 mb-2'>Bharati Hospital</h3>
-                      <p className='flex gap-1 items-center text-slate-500 text-sm font-medium'><img src="assets/icons/star.svg" alt="star" className='w-4 h-4'/> 4.0 (2209)</p>
-                      <p className='text-slate-500'><a href="mailto: bhartihospital@gmail.com">bhartihospital@gmail.com</a></p>
+                      <h3 className='font-bold text-xl tracking-tight text-blue-400 mb-2'>{state?.name}</h3>
+                      <p className='flex gap-1 items-center text-slate-500 text-sm font-medium'><img src="assets/icons/star.svg" alt="star" className='w-4 h-4'/>{`${state?.rating} (${state.review_count})`}</p>
+                      <p className='text-slate-500'><a href="mailto: bhartihospital@gmail.com">{state?.website}</a></p>
                       <div className='flex gap-2 items-center'>
                           <img src="/assets/icons/location1.svg" alt="location" className='w-6, h-6'/>
-                          <p className='text-sm text-slate-500'>Pune, Maharashtra</p>
+                          <p className='text-sm text-slate-500'>{state?.city}</p>
                       </div>
                     </div>
                 </div>
@@ -50,21 +59,21 @@ const HospitalDetails = () => {
                     <div className='flex justify-between items-center pb-5 border-b-2 border-b-gray-100 max-md:flex-wrap gap-4'>
                         <div className='flex gap-2'>
                             <img src="assets/icons/call.svg" alt="phone" className='opacity-50'/>
-                            <a href="tel: +912040555555" className='text-slate-500'>+912040555555</a>
+                            <a href="tel: +912040555555" className='text-slate-500'>{state?.phone_number}</a>
                         </div>
                         <div className='flex flex-col gap-1'>
                             <p className='text-slate-500 font-semibold text-sm'>Full Address</p>
-                            <p className='text-slate-500 text-sm md:max-w-[500px]'>Bharati Hospital, Pune - Satara Rd, Bharati Vidyapeeth Campus, Dhankawadi, Pune, Maharashtra 411043</p>
+                            <p className='text-slate-500 text-sm md:max-w-[500px]'>{state?.full_address}</p>
                         </div>
                     </div>
                     <div className='my-5 flex justify-between items-center pb-5 border-b-2 border-b-gray-100 max-md:flex-wrap gap-4'>
                         <div className=''>
                           <p className='text-slate-500 text-sm font-semibold mb-1'>Website</p>
-                        <a href="https://bharatihospital.com" target='_blank' className='font-medium text-blue-500'>bharatihospital.com</a>
+                        <Link to={state?.website} target='_blank' className='font-medium text-blue-500'>{state?.website} </Link>
                       </div>
                       <div className='md:w-[500px]'>
                         <p className='text-slate-500 text-sm font-semibold mb-1'>State</p>
-                        <p className='text-sm font-medium text-green-400'>Open 24 hours</p>
+                        <p className={`text-sm font-medium ${color}`}>{state?.state ? state?.state : 'unknown'}</p>
                       </div>
                     </div>
                     <div className='my-5'>
@@ -82,7 +91,7 @@ const HospitalDetails = () => {
                 <div className='flex justify-center flex-1'>
                   <div className='border-r-2 border-r-gray-100 pr-4'>
                     <p className='text-md font-semibold text-slate-500'>Your Location</p>
-                    <p className='font-bold text-slate-600'>Pict, Pune</p>
+                    <p className='font-bold text-slate-600'>{state?.city}</p>
                   </div>
                   <div className='pl-4'>
                     <p className='text-md font-semibold text-slate-500'>Distance</p>
@@ -90,7 +99,7 @@ const HospitalDetails = () => {
                   </div>
                 </div>
                 <div className='text-center my-8'>
-                  <Link to="https://www.google.com/maps/place/data=!3m1!4b1!4m2!3m1!1s0x3bc2eac774d3791d:0x136f70e79d9a7965" target='_blank' className='btn-primary'>Open in Google Maps Instead</Link>    
+                  <Link to={state?.place_link} target='_blank' className='btn-primary'>Open in Google Maps Instead</Link>    
                 </div>
               </div>
               <div className='mt-2 flex justify-center'>

@@ -1,17 +1,73 @@
-import React, { useState } from 'react'
-import { blood_types, diseases, medicines } from '../constants';
-import { Checkbox } from '../components'
+import React, { useEffect, useReducer, useState } from 'react'
+import { blood_types, diseases, medicines } from '../../constants';
+import { Checkbox } from '../../components'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
+import { useSelector } from 'react-redux';
+import { useRegisterForDonationMutation } from '../../app/services/appApi';
+import { useGetUserDetailsMutation } from '../../app/services/authApi';
+
+const initialState = {
+  donor_first : '', donor_last: '', dob: new Date(), gender: '', phone: '', email: '', weight: '', bmi: '', hb: '', bp: '', hasdonated: false, diseases: '', medicines: '', donor_comments: ''
+}
+
+const reducer = (state, action) => {
+  switch(action.type){
+    case 'FIRST':
+      return { ...state, donor_first: action.payload }
+    case 'LAST':
+      return { ...state, donor_last: action.payload }
+    case 'DOB':
+      return { ...state, dob: action.payload }
+    case 'GENDER':
+      return { ...state, gender: action.payload }
+    case 'PHONE':
+      return { ...state, phone: action.payload }
+    case 'EMAIL':
+      return { ...state, email: action.payload }
+    case 'WEIGHT':
+      return { ...state, weight: action.payload }
+      case 'BMI':
+      return { ...state, bmi: action.payload }
+    case 'HB':
+      return { ...state, hb: action.payload }
+    case 'BP':
+      return { ...state, bp: action.payload }
+    case 'HASDONATED':
+      return { ...state, hasdonated: action.payload }
+    case 'DISEASES':
+      return { ...state, diseases: action.payload }
+    case 'MEDICINES':
+      return { ...state, medicines: action.payload }
+    case 'COMMENTS':
+      return { ...state, donor_comments: action.payload }
+  }
+}
 
 const RegisterForDonation = () => {
 
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { user } = useSelector(state => state.auth)
   const [bloodtype, setBloodtype] = useState('');
-  const [gender, setGender] = useState('');
-  const [dob, setDob] = useState(new Date());
-  const [hasDonated, sethasDonated] = useState(false);
   const [diseaseList, setDiseaseList] = useState([]);
   const [medicineList, setMedicineList] = useState([]);
+  const [registerForDonation, {data: donorData, isSuccess: donorSuccess, isError: donorError, isLoading: donorLoading}] = useRegisterForDonationMutation();
+  const [getUserDetails, {data, isSuccess, isError, isLoading}] = useGetUserDetailsMutation();
+
+  async function getUser(){
+    await getUserDetails(user)
+  }
+
+  useEffect(() => {
+    if(!data)
+      getUser();
+    if(data){
+      dispatch({type: 'FIRST', payload: data.firstname})
+      dispatch({type: 'LAST', payload: data.lastname})
+      dispatch({type: 'EMAIL', payload: data.email})
+      dispatch({type: 'DOB', payload: data.dob})
+    }
+  }, [isSuccess, data])
 
   const handleDiseaseSelect = (e) => {
     const value = e.target.value;
@@ -26,7 +82,7 @@ const RegisterForDonation = () => {
       newList = [...diseaseList, value];
     }
     setDiseaseList(newList);
-    console.log(value)
+    dispatch({type: 'DISEASES', payload: newList})
   }
 
   const handleMedicineSelect = (e) => {
@@ -42,7 +98,7 @@ const RegisterForDonation = () => {
       newList = [...medicineList, value];
     }
     setMedicineList(newList);
-    console.log(value)
+    dispatch({type: 'MEDICINES', payload: newList})
   }
 
   const handleBloodChange = (e) => {
@@ -51,15 +107,34 @@ const RegisterForDonation = () => {
   }
 
   const handleGenderChange = (e) => {
-    setGender(e.target.value)
+    dispatch({type: 'GENDER', payload: e.target.value})
   }
 
   const handleDateChange = (newdate) => {
-    setDob(newdate)
+    dispatch({type: 'DOB', payload: newdate})
   }
 
   const handlehasDonatedChange = (e) => {
-    sethasDonated(hasDonated => !hasDonated)
+    if(e.target.value === 'false'){
+      dispatch({type: 'HASDONATED', payload: false})
+    }
+    else{
+      dispatch({type: 'HASDONATED', payload: true})
+    }
+  }
+
+  async function handleRegister(){
+    await registerForDonation(state)
+  }
+
+  const handleSubmit = (e) => {
+    // console.log(state)
+    const diseaseList = state.diseases.toString();
+    const medicineList = state.medicines.toString();
+    dispatch({type: 'DISEASES', payload: diseaseList})
+    dispatch({type: 'MEDICINES', payload: medicineList})
+    handleRegister();
+    donorSuccess && console.log(donorData)
   }
 
   return (
@@ -73,7 +148,7 @@ const RegisterForDonation = () => {
             <div className='h-[100px] animate-bounce relative right-[78px] top-8'>
               <img src="/assets/images/blood_drop.svg" alt="drop" className='w-[100px]'/>
             </div>
-            <div className='w-[80px] h-[40px] bg-red-800 absolute bottom-20 left-12 rounded-full blur-xl animate-bounce'></div>
+            <div className='w-[80px] h-[30px] bg-red-800 absolute bottom-20 left-12 rounded-full blur-xl animate-bounce'></div>
             <div className='h-[200px] overflow-hidden'>
               <img src="/assets/images/hand.svg" alt="hand" className='w-[350px]'/>
             </div>
@@ -83,7 +158,7 @@ const RegisterForDonation = () => {
       <div className='lg:w-[800px] mx-auto max-lg:mx-10'>
         <div className='card p-8 my-10'>
         <h3 className='font-bold text-3xl text-center my-4 mb-7 text-slate-500'>Register for donation Now!</h3>
-        <form action="" className='flex flex-col mx-16 max-md:mx-3'>
+        <form action="" className='flex flex-col mx-16 max-md:mx-3' onSubmit={(e) => e.preventDefault()}>
           <div>
             <label htmlFor="bloodtype" className='text-label'>Select Your Blood Type</label>
             <div id='bloodtype' className='my-4 grid grid-cols-2 max-md:grid-cols-1 max-md:gap-y-2'>
@@ -116,8 +191,8 @@ const RegisterForDonation = () => {
           <div>
             <label htmlFor="name" className='text-label'>Full Name</label>
             <div className='my-4 grid grid-cols-2 max-md:grid-cols-1 max-md:gap-y-2 max-md:my-2'>
-              <input type="text" placeholder='First Name' className='form-input mr-10'/>
-              <input type="text" placeholder='Last Name' className='form-input mr-10' />
+              <input type="text" placeholder='First Name' className='form-input mr-10' value={state.donor_first} onChange={(e) => dispatch({type: 'FIRST', payload: e.target.value})}/>
+              <input type="text" placeholder='Last Name' className='form-input mr-10'  value={state.donor_last} onChange={(e) => dispatch({type: 'LAST', payload: e.target.value})}/>
             </div>
           </div>
           <div className='grid grid-cols-2 max-md:grid-cols-1 max-md:gap-y-2 items-baseline'>
@@ -125,7 +200,7 @@ const RegisterForDonation = () => {
               <label htmlFor="dob" className='text-label'>Birth Date</label>
               <div className='outline-none border-none p-2 bg-slate-100 rounded-md max-md:my-2 my-4 flex items-center gap-2 w-fit'>
                 <img src="/assets/icons/date.svg" alt="date"  className='w-4 h-4 opacity-70'/>
-                <DatePicker selected={dob} onChange={handleDateChange} 
+                <DatePicker selected={state.dob} onChange={handleDateChange} 
                   placeholderText='Enter Suitable Date'
                   dateFormat='dd/MM/yyyy'
                   showYearDropdown
@@ -137,11 +212,11 @@ const RegisterForDonation = () => {
               <label htmlFor="gender" className='text-label'>Gender</label>
               <div className='flex my-4 max-md:my-3 gap-[100px]'>
                 <label className='flex items-center'>
-                  <input type="radio" value={`male`} checked={gender==='male'} onChange={handleGenderChange} />
+                  <input type="radio" value={`male`} checked={state.gender==='male'} onChange={handleGenderChange} />
                   <span className='pl-2 text-sm font-medium text-slate-500 cursor-pointer'>Male</span>
                 </label>
                 <label className='flex items-center'>
-                  <input type="radio" value={`female`} checked={gender==='female'} onChange={handleGenderChange} />
+                  <input type="radio" value={`female`} checked={state.gender==='female'} onChange={handleGenderChange} />
                   <span className='pl-2 text-sm font-medium text-slate-500 cursor-pointer'>Female</span>
                 </label>
               </div>
@@ -150,42 +225,42 @@ const RegisterForDonation = () => {
           <div className='grid grid-cols-2 max-md:grid-cols-1 max-md:mt-2 max-md:gap-y-2'>
             <div className='flex flex-col'>
               <label htmlFor="phone" className='text-label'>Phone</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 9867542315'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 9867542315' value={state.phone} onChange={(e) => dispatch({type: 'PHONE', payload: e.target.value})}/>
             </div>
             <div className='flex flex-col'>
               <label htmlFor="email" className='text-label'>Email</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. katie@gmail.com'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. katie@gmail.com' value={state.email} onChange={(e) => dispatch({type: 'EMAIL', payload: e.target.value})}/>
             </div>
           </div>
           <div className='grid grid-cols-2 max-md:grid-cols-1 max-md:gap-y-2 mt-3'>
             <div className='flex flex-col'>
               <label htmlFor="weight" className='text-label'>Weight</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 70kg'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 70kg' value={state.weight} onChange={(e) => dispatch({type: 'WEIGHT', payload: e.target.value})}/>
             </div>
             <div className='flex flex-col'>
               <label htmlFor="bmi" className='text-label'>BMI</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 18.5kg/m2'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 18.5kg/m2'value={state.bmi} onChange={(e) => dispatch({type: 'BMI', payload: e.target.value})}/>
             </div>
           </div>
           <div className='grid grid-cols-2 max-md:grid-cols-1 max-md:gap-y-2 mt-3'>
             <div className='flex flex-col'>
               <label htmlFor="Hb" className='text-label'>Hb</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 15.9g/dL'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 15.9g/dL' value={state.hb} onChange={(e) => dispatch({type: 'HB', payload: e.target.value})}/>
             </div>
             <div className='flex flex-col'>
               <label htmlFor="BP" className='text-label'>BP</label>
-              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 119/70mm Hg'/>
+              <input type="text" className='form-input my-4 max-md:my-2 mr-10' placeholder='eg. 119/70mm Hg' value={state.bp} onChange={(e) => dispatch({type: 'BP', payload: e.target.value})}/>
             </div>
           </div>
           <div className='mt-4'>
             <label htmlFor="hasdonated" className='text-label'>Have you donated previously?</label>
             <div className='flex my-4 max-md:my-2 gap-[100px]'>
               <label className='flex items-center'>
-                <input type="radio" value={`male`} checked={hasDonated} onChange={handlehasDonatedChange} />
+                <input type="radio" value={`true`} checked={state.hasdonated} onChange={handlehasDonatedChange} />
                 <span className='pl-2 text-sm font-medium text-slate-500 cursor-pointer'>Yes</span>
               </label>
               <label className='flex items-center'>
-                <input type="radio" value={`female`} checked={!hasDonated} onChange={handlehasDonatedChange} />
+                <input type="radio" value={`false`} checked={!state.hasdonated} onChange={handlehasDonatedChange} />
                 <span className='pl-2 text-sm font-medium text-slate-500 cursor-pointer'>No</span>
               </label>
             </div>
@@ -212,9 +287,9 @@ const RegisterForDonation = () => {
           </div>
           <div className='md:col-span-2 flex flex-col gap-3 max-md:w-full mb-4'>
             <label htmlFor="comments" className='text-label'>Enter comments</label>
-            <textarea name="comments" id="comments" rows={5} maxLength={2200} className='outline-none border-none p-2 bg-slate-100 rounded-md text-slate-600 font-medium text-sm w-full'></textarea>
+            <textarea name="comments" id="comments" rows={5} maxLength={2200} className='outline-none border-none p-2 bg-slate-100 rounded-md text-slate-600 font-medium text-sm w-full' value={state.donor_comments} onChange={(e) => dispatch({type: 'COMMENTS', payload: e.target.value})}></textarea>
           </div>
-          <button className='btn-primary my-4 max-md:my-2 self-start'>Submit</button>
+          <button className='btn-primary my-4 max-md:my-2 self-start' onClick={handleSubmit}>{donorLoading ? `loading` : `Submit`}</button>
           </form>
         </div>
       </div>

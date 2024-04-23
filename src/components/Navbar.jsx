@@ -1,8 +1,34 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Logo from './Logo'
+import { useDispatch, useSelector } from 'react-redux'
+import { resetUser } from '../app/features/authSlice'
 
 const Navbar = () => {
+  const { user: currentUser } = useSelector(state => state.auth)
+  const [user, setUser] = useState(currentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async (e) => {
+    const response = await fetch('http://localhost:8000/auth/logout', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    const data = await response.json();
+    console.log(data)
+    if(data.success){
+      console.log('hello')
+      localStorage.removeItem('user')
+      setUser(null)
+      dispatch(resetUser())
+    }
+  }
+
+  const handleLogin = (e) => {
+    navigate('/sign-in')
+  }
+
   return (
     <nav className='flex w-full shadow-md p-4 justify-center items-center bg-white max-lg:px-10'>
       <div className='flex justify-between items-center w-[1270px]'>
@@ -29,6 +55,11 @@ const Navbar = () => {
               <img src="assets/icons/search-icon.svg" alt="search" className='w-5 h-5'/>
               <input type="text" placeholder='search' className='bg-transparent outline-none border-none'/>
             </div>
+          </li>
+          <li>
+            {user ? <button className='btn btn-primary rounded-md' onClick={handleLogout}>{`Logout`}</button> :
+            <button className='btn btn-primary rounded-md' onClick={handleLogin}>Login</button>
+            }
           </li>
         </ul>
       </div>

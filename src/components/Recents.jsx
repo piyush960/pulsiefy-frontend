@@ -7,7 +7,7 @@ const Recents = () => {
     <h3 className='font-bold text-slate-500 text-lg text-center my-5'>Your Recent Searches</h3>
     <section className='lg:mycontainer mx-auto max-lg:mx-10 grid grid-cols-3 max-lg:grid-cols-2 max-md:flex-col max-md:flex gap-5 my-10'>
       <Link to={`/`}>
-        <div className='card p-5 flex gap-10 relative hover:scale-105 hover:shadow-2xl transition ease-in flex-1 flex-1'>
+        <div className='card p-5 flex gap-10 relative hover:scale-105 hover:shadow-2xl transition ease-in flex-1'>
           <Link to={'/'} className='absolute right-5 top-4 bg-red-300 rounded-md p-1 hover:bg-red-400 transition-colors ease-in'>
             <img src="/assets/icons/close-btn.svg" alt="delete" className='w-3 h-3 opacity-70'/>
           </Link>
