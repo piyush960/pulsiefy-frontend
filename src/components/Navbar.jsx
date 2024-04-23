@@ -11,7 +11,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = async (e) => {
-    const response = await fetch('http://localhost:8000/auth/logout', {
+    const response = await fetch('https://pulsiefy-backend.onrender.com/auth/logout', {
       method: 'GET',
       credentials: 'include'
     })

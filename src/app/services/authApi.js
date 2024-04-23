@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseURL = 'http://localhost:8000/auth'
+const baseURL = 'https://pulsiefy-backend.onrender.com/auth'
 
 export const authApi = createApi({
     reducerPath: "auths",
